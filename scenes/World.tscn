@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bm5u07ubgjs6e"]
+
+[ext_resource type="Script" uid="uid://k68kungsmp1t" path="res://scripts/world.gd" id="1_32lhk"]
+[ext_resource type="Script" uid="uid://0kslt846o7yw" path="res://scripts/camera_2d.gd" id="2_32lhk"]
+
+[node name="World" type="Node2D" unique_id=255306921]
+script = ExtResource("1_32lhk")
+
+[node name="Chunks" type="Node2D" parent="." unique_id=824398547]
+y_sort_enabled = true
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1518837115]
+script = ExtResource("2_32lhk")
