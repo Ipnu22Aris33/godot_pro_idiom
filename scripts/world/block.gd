@@ -13,11 +13,14 @@ const TILES = {
 	"water": Vector2i(3, 0),
 }
 
+var world_x: int = 0
+var world_y: int = 0
+var world_h: int = 0
+
 func _ready() -> void:
 	sprite.region_enabled = true
 
 func set_type(type: String) -> void:
-	await ready
 	if not is_inside_tree():
 		await tree_entered
 	var coord = TILES.get(type, Vector2i(0, 0))
