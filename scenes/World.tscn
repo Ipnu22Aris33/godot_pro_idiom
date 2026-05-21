@@ -5,7 +5,7 @@
 
 [node name="World" type="Node2D" unique_id=255306921]
 script = ExtResource("1_32lhk")
-world_seed = 768
+world_seed = 2
 
 [node name="Chunks" type="Node2D" parent="." unique_id=824398547]
 y_sort_enabled = true

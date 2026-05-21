@@ -7,44 +7,56 @@ const BLOCK_Z = 16
 
 enum Direction {NORTH, EAST, SOUTH, WEST}
 
-static func to_screen(x: int, y: int, h: int = 0, dir: int = Direction.NORTH, center: int = 16) -> Vector2:
-	var cx = x - center
-	var cy = y - center
+class ScreenParams:
+	var x: int = 0
+	var y: int = 0
+	var h: int = 0
+	var dir: int = Direction.NORTH
+	var center: int = 16
+
+static func screen_at(x: int, y: int, h: int, dir: int, center: int) -> ScreenParams:
+	var p = ScreenParams.new()
+	p.x = x
+	p.y = y
+	p.h = h
+	p.dir = dir
+	p.center = center
+	return p
+
+static func to_screen(p: ScreenParams) -> Vector2:
+	var cx = p.x - p.center
+	var cy = p.y - p.center
 
 	var rx = cx
 	var ry = cy
 
-	match dir:
+	match p.dir:
 		Direction.EAST: rx = cy; ry = - cx
 		Direction.SOUTH: rx = - cx; ry = - cy
 		Direction.WEST: rx = - cy; ry = cx
 
-	rx += center
-	ry += center
+	rx += p.center
+	ry += p.center
 
 	return Vector2(
 		(rx - ry) * (BLOCK_W / 2.0),
-		(rx + ry) * (BLOCK_H / 2.0) - h * BLOCK_Z
+		(rx + ry) * (BLOCK_H / 2.0) - p.h * BLOCK_Z
 	)
 
-static func z_index(x: int, y: int, h: int = 0, dir: int = Direction.NORTH, center: int = 16) -> int:
-	var cx = x - center
-	var cy = y - center
+static func z_index(p: ScreenParams) -> int:
+	var cx = p.x - p.center
+	var cy = p.y - p.center
 
 	var rx = cx
 	var ry = cy
 
-	match dir:
+	match p.dir:
 		Direction.EAST: rx = cy; ry = - cx
 		Direction.SOUTH: rx = - cx; ry = - cy
 		Direction.WEST: rx = - cy; ry = cx
 
-	rx += center
-	ry += center
+	rx += p.center
+	ry += p.center
 
-	return rx + ry + h
+	return rx + ry + p.h
 
-static func to_world(screen: Vector2) -> Vector2i:
-	var x = (screen.x / (BLOCK_W / 2.0) + screen.y / (BLOCK_H / 2.0)) / 2.0
-	var y = (screen.y / (BLOCK_H / 2.0) - screen.x / (BLOCK_W / 2.0)) / 2.0
-	return Vector2i(int(round(x)), int(round(y)))
