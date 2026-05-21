@@ -1,5 +1,5 @@
 class_name Block
-extends Area2D
+extends Node2D
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -17,15 +17,10 @@ var world_x: int = 0
 var world_y: int = 0
 var world_h: int = 0
 
-var world: Node = null
+var hovered := false
 
 func _ready() -> void:
-	input_pickable = true
-
 	sprite.region_enabled = true
-
-	mouse_entered.connect(_on_mouse_entered)
-	mouse_exited.connect(_on_mouse_exited)
 
 func set_type(type: String) -> void:
 	if not is_inside_tree():
@@ -40,14 +35,30 @@ func set_type(type: String) -> void:
 		SPRITE_SIZE
 	)
 
-func _on_mouse_entered() -> void:
-	sprite.modulate = Color(1.3, 1.3, 1.3)
+func _draw() -> void:
+	if not hovered:
+		return
+	
+	var hw = Iso.BLOCK_W / 2.0
+	var hh = Iso.BLOCK_H / 2.0
+	
+	# Top face diamond
+	var points = PackedVector2Array([
+		Vector2(0, -hh),
+		Vector2(hw, 0),
+		Vector2(0, hh),
+		Vector2(-hw, 0),
+		Vector2(0, -hh),
+	])
+	draw_polyline(points, Color.RED, 2.0)
+	
+	# Front face
+	draw_rect(
+    Rect2(Vector2(-hw, hh), Vector2(Iso.BLOCK_W, Iso.BLOCK_Z)),
+    Color.YELLOW, false, 2.0
+	)
 
-	if world:
-		world.hovered_block = self
-
-func _on_mouse_exited() -> void:
-	sprite.modulate = Color.WHITE
-
-	if world and world.hovered_block == self:
-		world.hovered_block = null
+func set_hovered(value: bool) -> void:
+	hovered = value
+	sprite.modulate = Color(1.3, 1.3, 1.3) if hovered else Color.WHITE
+	queue_redraw()

@@ -60,3 +60,11 @@ static func z_index(p: ScreenParams) -> int:
 
 	return rx + ry + p.h
 
+static func is_in_front(ax: int, ay: int, ah: int, bx: int, by: int, bh: int) -> bool:
+	# Di isometric, block lebih depan kalau x+y lebih besar
+	# Kalau x+y sama, yang h lebih tinggi yang di depan
+	var a_depth = ax + ay
+	var b_depth = bx + by
+	if a_depth != b_depth:
+		return a_depth < b_depth
+	return ah > bh

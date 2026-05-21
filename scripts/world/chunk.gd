@@ -40,7 +40,7 @@ func render_stack(x: int, y: int) -> void:
 	for h in range(int(tile.height)):
 		world_data[Vector3i(x, y, h)] = true
 
-		if _is_hidden(x, y, h, tile.height):
+		if is_block_hidden(x, y, h, tile.height):
 			continue
 
 		var depth_from_top = tile.height - h - 1
@@ -54,7 +54,7 @@ func render_stack(x: int, y: int) -> void:
 
 		place_block(x, y, h, block_type)
 
-func _is_hidden(x: int, y: int, h: int, total_height: int) -> bool:
+func is_block_hidden(x: int, y: int, h: int, total_height: int) -> bool:
 	if h == total_height - 1:
 		return false
 
@@ -84,7 +84,6 @@ func place_block(x: int, y: int, h: int, type: String) -> void:
 	block.world_x = x
 	block.world_y = y
 	block.world_h = h
-	block.world = get_tree().get_first_node_in_group("world")
 	block.position = Iso.to_screen(
 		Iso.screen_at(x, y, h, view_direction, _center)
 	)
@@ -177,3 +176,9 @@ func update_view(dir: int) -> void:
 				_center
 			)
 		)
+
+# Di Chunk.gd tambahkan:
+func get_block_render_priority(block: Block) -> float:
+	# Formula yang sama dengan Y-sort Godot
+	# Block dengan posisi y lebih rendah digambar belakangan (lebih depan)
+	return block.global_position.y

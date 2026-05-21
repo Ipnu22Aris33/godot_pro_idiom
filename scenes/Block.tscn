@@ -3,12 +3,9 @@
 [ext_resource type="Script" uid="uid://bfk30mmt210nh" path="res://scripts/world/block.gd" id="1_bwmav"]
 [ext_resource type="Texture2D" uid="uid://djoba1j85iw6k" path="res://assets/tiles/Sprite-0002.png" id="2_bwmav"]
 
-[node name="Block" type="Area2D" unique_id=1172805903]
+[node name="Block" type="Node2D" unique_id=587723972]
 script = ExtResource("1_bwmav")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=411359001]
 texture = ExtResource("2_bwmav")
 region_enabled = true
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=14580111]
-polygon = PackedVector2Array(0, -8, 16, 0, 0, 8, -16, 0)
