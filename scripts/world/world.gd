@@ -6,82 +6,75 @@ const CHUNK_SCENE = preload("res://scenes/Chunk.tscn")
 @export var chunk_range: int = 2
 
 var generator = WorldGenerator.new()
-var world_data: Dictionary = {}
+
+var hovered_block: Block = null
+
 var view_direction: int = Iso.Direction.NORTH
 
 func _ready() -> void:
+	add_to_group("world")
 	var active_seed = world_seed if world_seed != 0 else randi()
+
 	print("World Seed: ", active_seed)
+
 	generator.setup(active_seed)
+
 	generate_world()
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Rotate view
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_E:
-			view_direction = (view_direction + 1) % 4
-			_update_view()
-		elif event.keycode == KEY_Q:
-			view_direction = (view_direction - 1 + 4) % 4
-			_update_view()
+		match event.keycode:
+			KEY_E:
+				view_direction = (view_direction + 1) % 4
+				_update_view()
 
-	# Klik kiri — hancurkan block
+			KEY_Q:
+				view_direction = (view_direction - 1 + 4) % 4
+				_update_view()
+
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			_try_break_block()
 
-func _try_break_block() -> void:
-	var mouse = get_global_mouse_position()
+func generate_world() -> void:
+	var center = (chunk_range * 16.0) / 2
 
-	var best_block = null
-	var best_depth = -INF
+	for chunk_x in range(chunk_range):
+		for chunk_y in range(chunk_range):
+			spawn_chunk(chunk_x, chunk_y, center)
 
+func regenerate_world() -> void:
 	for chunk in $Chunks.get_children():
-		var block = chunk.pick_block(mouse)
+		chunk.queue_free()
 
-		if block == null:
-			continue
+	generate_world()
 
-		var depth = block.world_x + block.world_y + block.world_h
-
-		if depth > best_depth:
-			best_depth = depth
-			best_block = block
-
-	if best_block == null:
-		return
-
-	for chunk in $Chunks.get_children():
-		if chunk.break_block(
-			best_block.world_x,
-			best_block.world_y,
-			best_block.world_h
-		):
-			return
+func spawn_chunk(chunk_x: int, chunk_y: int, center: int) -> void:
+	var chunk = CHUNK_SCENE.instantiate()
+	chunk.generator = generator
+	chunk.view_direction = view_direction
+	chunk._center = center
+	# Tidak pass world_data lagi
+	$Chunks.add_child(chunk)
+	chunk.generate(chunk_x, chunk_y)
 
 func _update_view() -> void:
 	for chunk in $Chunks.get_children():
 		chunk.update_view(view_direction)
 
-func generate_world() -> void:
-	var center = (chunk_range * 16.0) / 2
-	for x in range(chunk_range):
-		for y in range(chunk_range):
-			spawn_chunk(x, y, center)
+func _try_break_block() -> void:
+	if hovered_block == null:
+		print("No hovered block")
+		return
 
-func regenerate_world() -> void:
+	print("Trying break: ", hovered_block.world_x, hovered_block.world_y, hovered_block.world_h)
+
+	var x = hovered_block.world_x
+	var y = hovered_block.world_y
+	var h = hovered_block.world_h
+
 	for chunk in $Chunks.get_children():
-		chunk.queue_free()
-	generate_world()
-
-func spawn_chunk(chunk_x: int, chunk_y: int, center: int) -> void:
-	var chunk = CHUNK_SCENE.instantiate()
-
-	chunk.generator = generator
-	chunk.view_direction = view_direction
-	chunk.world_data = world_data
-	chunk._center = center
-
-	$Chunks.add_child(chunk)
-
-	chunk.generate(chunk_x, chunk_y)
+		print("Chunk world_data has key: ", chunk.world_data.has(Vector3i(x, y, h)))
+		if chunk.break_block(x, y, h):
+			print("Broken!")
+			return

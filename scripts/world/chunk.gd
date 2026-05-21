@@ -1,18 +1,18 @@
 extends Node2D
 
 const BLOCK_SCENE = preload("res://scenes/Block.tscn")
+
 const CHUNK_SIZE = 16
 
 var generator: WorldGenerator
 
-var view_direction: int = Iso.Direction.NORTH
+var world_data: Dictionary = {}
 
-var world_data: Dictionary
-
-# node visual saja
 var rendered_blocks: Dictionary = {}
 
 var tile_cache: Dictionary = {}
+
+var view_direction: int = Iso.Direction.NORTH
 
 var _center: int = 16
 
@@ -25,9 +25,7 @@ func generate(chunk_x: int, chunk_y: int) -> void:
 			var wx = x + chunk_x * CHUNK_SIZE
 			var wy = y + chunk_y * CHUNK_SIZE
 
-			var tile = generator.get_tile_data(wx, wy)
-
-			tile_cache[Vector2i(wx, wy)] = tile
+			tile_cache[Vector2i(wx, wy)] = generator.get_tile_data(wx, wy)
 
 	for x in range(CHUNK_SIZE):
 		for y in range(CHUNK_SIZE):
@@ -39,7 +37,7 @@ func generate(chunk_x: int, chunk_y: int) -> void:
 func render_stack(x: int, y: int) -> void:
 	var tile = tile_cache[Vector2i(x, y)]
 
-	for h in range(tile.height):
+	for h in range(int(tile.height)):
 		world_data[Vector3i(x, y, h)] = true
 
 		if _is_hidden(x, y, h, tile.height):
@@ -86,7 +84,7 @@ func place_block(x: int, y: int, h: int, type: String) -> void:
 	block.world_x = x
 	block.world_y = y
 	block.world_h = h
-
+	block.world = get_tree().get_first_node_in_group("world")
 	block.position = Iso.to_screen(
 		Iso.screen_at(x, y, h, view_direction, _center)
 	)
@@ -99,42 +97,9 @@ func place_block(x: int, y: int, h: int, type: String) -> void:
 
 	rendered_blocks[Vector3i(x, y, h)] = block
 
-func pick_block(mouse: Vector2):
-	var best_block = null
-	var best_depth = - INF
-
-	for block in rendered_blocks.values():
-		var rect = Rect2(
-			block.global_position - Vector2(Iso.BLOCK_W / 2, Iso.BLOCK_H / 2),
-			Vector2(Iso.BLOCK_W, Iso.BLOCK_H)
-		)
-
-		if not rect.has_point(mouse):
-			continue
-
-		var above = Vector3i(
-			block.world_x,
-			block.world_y,
-			block.world_h + 1
-		)
-
-		if world_data.has(above):
-			continue
-
-		var depth = (
-			block.world_x +
-			block.world_y +
-			block.world_h
-		)
-
-		if depth > best_depth:
-			best_depth = depth
-			best_block = block
-
-	return best_block
-
 func break_block(x: int, y: int, h: int) -> bool:
 	var key = Vector3i(x, y, h)
+	print("break_block called, has key: ", world_data.has(key))
 
 	if not world_data.has(key):
 		return false
@@ -144,7 +109,7 @@ func break_block(x: int, y: int, h: int) -> bool:
 	_remove_rendered_block(x, y, h)
 
 	_reveal_block_below(x, y, h)
-
+	print("BREAK: ", x, y, h)
 	return true
 
 func _remove_rendered_block(x: int, y: int, h: int) -> void:
