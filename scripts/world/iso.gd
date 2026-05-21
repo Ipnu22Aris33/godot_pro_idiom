@@ -51,14 +51,23 @@ static func z_index(p: ScreenParams) -> int:
 	var ry = cy
 
 	match p.dir:
-		Direction.EAST: rx = cy; ry = - cx
-		Direction.SOUTH: rx = - cx; ry = - cy
-		Direction.WEST: rx = - cy; ry = cx
+		Direction.EAST:
+			rx = cy
+			ry = - cx
+
+		Direction.SOUTH:
+			rx = - cx
+			ry = - cy
+
+		Direction.WEST:
+			rx = - cy
+			ry = cx
 
 	rx += p.center
 	ry += p.center
 
-	return rx + ry + p.h
+	# render depth
+	return (rx + ry) * 100 + p.h
 
 static func is_in_front(ax: int, ay: int, ah: int, bx: int, by: int, bh: int) -> bool:
 	# Di isometric, block lebih depan kalau x+y lebih besar

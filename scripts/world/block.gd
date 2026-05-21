@@ -19,6 +19,10 @@ var world_h: int = 0
 
 var hovered := false
 
+# IMPORTANT
+var show_left := true
+var show_right := true
+
 func _ready() -> void:
 	sprite.region_enabled = true
 
@@ -38,25 +42,80 @@ func set_type(type: String) -> void:
 func _draw() -> void:
 	if not hovered:
 		return
-	
+
 	var hw = Iso.BLOCK_W / 2.0
 	var hh = Iso.BLOCK_H / 2.0
-	
-	# Top face diamond
-	var points = PackedVector2Array([
-		Vector2(0, -hh),
-		Vector2(hw, 0),
-		Vector2(0, hh),
-		Vector2(-hw, 0),
-		Vector2(0, -hh),
+	var bz = Iso.BLOCK_Z
+
+	var top_y = - bz / 2.0
+
+	# ==================================================
+	# TOP FACE
+	# ==================================================
+
+	var top_poly = PackedVector2Array([
+		Vector2(0, top_y - hh),
+		Vector2(hw, top_y),
+		Vector2(0, top_y + hh),
+		Vector2(-hw, top_y),
 	])
-	draw_polyline(points, Color.RED, 2.0)
-	
-	# Front face
-	draw_rect(
-    Rect2(Vector2(-hw, hh), Vector2(Iso.BLOCK_W, Iso.BLOCK_Z)),
-    Color.YELLOW, false, 2.0
+
+	draw_colored_polygon(
+		top_poly,
+		Color(1, 0, 0, 0.25)
 	)
+
+	draw_polyline(
+		top_poly + PackedVector2Array([top_poly[0]]),
+		Color.RED,
+		2.0
+	)
+
+	# ==================================================
+	# LEFT FACE
+	# ==================================================
+
+	if show_left:
+		var left_poly = PackedVector2Array([
+			Vector2(-hw, top_y),
+			Vector2(0, top_y + hh),
+			Vector2(0, top_y + hh + bz),
+			Vector2(-hw, top_y + bz)
+		])
+
+		draw_colored_polygon(
+			left_poly,
+			Color(0, 1, 0, 0.25)
+		)
+
+		draw_polyline(
+			left_poly + PackedVector2Array([left_poly[0]]),
+			Color.GREEN,
+			2.0
+		)
+
+	# ==================================================
+	# RIGHT FACE
+	# ==================================================
+
+	if show_right:
+		var right_poly = PackedVector2Array([
+			Vector2(0, top_y + hh),
+			Vector2(hw, top_y),
+			Vector2(hw, top_y + bz),
+			Vector2(0, top_y + hh + bz)
+		])
+
+		draw_colored_polygon(
+			right_poly,
+			Color(0, 0.5, 1, 0.25)
+		)
+
+		draw_polyline(
+			right_poly + PackedVector2Array([right_poly[0]]),
+			Color.CYAN,
+			2.0
+		)
 
 func set_hovered(value: bool) -> void:
 	hovered = value
